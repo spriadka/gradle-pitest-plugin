@@ -4,8 +4,9 @@ jobs:
      working_directory: ~/gradle-pitest-plugin
      docker:
        - image: circleci/openjdk:8-jdk
+         environment:
+           TERM: dumb
      steps:
        - checkout
-       # How to set environment variable in yml file?
-       - run: TERM=dumb ./gradlew check
+       - run: ./gradlew check
 
