@@ -4,8 +4,8 @@ jobs:
      working_directory: ~/gradle-pitest-plugin
      docker:
        - image: circleci/openjdk:8-jdk
-         environment:
-           TERM: dumb
+     environment:
+       TERM: dumb
      steps:
        - checkout
        - run:
