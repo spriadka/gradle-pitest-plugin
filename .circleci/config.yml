@@ -1,0 +1,9 @@
+version: 2
+jobs:
+   build:
+     working_directory: ~/gradle-pitest-plugin
+     docker:
+       - image: circleci/openjdk:8-jdk
+     steps:
+       - checkout
+       - run: ./gradlew check
