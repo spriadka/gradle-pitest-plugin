@@ -7,6 +7,7 @@ jobs:
          environment:
            TERM: dumb
      steps:
+       - checkout
        - run:
            name: build-and-test
            command: |
