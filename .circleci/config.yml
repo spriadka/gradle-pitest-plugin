@@ -7,7 +7,4 @@ jobs:
      steps:
        - checkout
        - run: ./gradlew check
-   funcTest:
-     steps:
-       - run: export TERM=dumb
-       - run: ./gradew funcTest
+
