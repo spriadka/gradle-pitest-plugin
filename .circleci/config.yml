@@ -9,8 +9,8 @@ jobs:
      steps:
        - checkout
        - run:
-         - name: build-and-test
-         - command: |
+         name: build-and-test
+         command: |
            ./gradlew check
            ./gradlew funcTest
 
