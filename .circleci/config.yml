@@ -7,10 +7,9 @@ jobs:
          environment:
            TERM: dumb
      steps:
-       - checkout
        - run:
-         name: build-and-test
-         command: |
-           ./gradlew check
-           ./gradlew funcTest
+           name: build-and-test
+           command: |
+             ./gradlew check
+             ./gradlew funcTest
 
