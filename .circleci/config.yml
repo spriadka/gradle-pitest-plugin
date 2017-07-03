@@ -1,6 +1,6 @@
 version: 2
 jobs:
-   build:
+   build-java8:
      working_directory: ~/gradle-pitest-plugin
      docker:
        - image: circleci/openjdk:8-jdk
@@ -13,4 +13,23 @@ jobs:
            command: |
              ./gradlew check
              ./gradlew funcTest
+   build-java7:
+     working_directory: ~/gradle-pitest-plugin
+     docker:
+       - image: circleci/openjdk:7-jdk
+     environment:
+       TERM: dumb
+     steps:
+       - checkout
+       - run:
+           name: build-and-test
+           command: |
+             ./gradlew check
+             ./gradlew funcTest
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build-java8
+      - build-java7
 
