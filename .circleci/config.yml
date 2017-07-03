@@ -6,6 +6,6 @@ jobs:
        - image: circleci/openjdk:8-jdk
      steps:
        - checkout
-       - run: export TERM=dumb
-       - run: ./gradlew check
+       # How to set environment variable in yml file?
+       - run: TERM=dumb ./gradlew check
 
