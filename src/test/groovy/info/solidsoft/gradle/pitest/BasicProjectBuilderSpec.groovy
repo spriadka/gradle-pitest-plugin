@@ -24,6 +24,7 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import static info.solidsoft.gradle.pitest.PitestPlugin.PITEST_TASK_NAME
+import static info.solidsoft.gradle.pitest.PitestPlugin.SCM_PITEST_TASK_NAME
 
 /**
  * @see WithPitestTaskInitialization
@@ -55,5 +56,12 @@ abstract class BasicProjectBuilderSpec extends Specification {
         assert tasks?.size() == 1 : "Expected tasks: '$PITEST_TASK_NAME', All tasks: ${project.tasks}"
         assert tasks[0] instanceof PitestTask
         return (PitestTask)tasks[0]
+    }
+
+    protected ScmPitestTask getJustOneScmPitestTaskOrFail() {
+        Set<Task> tasks = project.getTasksByName(SCM_PITEST_TASK_NAME, false)
+        assert tasks?.size() == 1 : "Expected tasks: '$SCM_PITEST_TASK_NAME', All tasks ${project.tasks}"
+        assert tasks[0] instanceof ScmPitestTask
+        return (ScmPitestTask) tasks[0]
     }
 }

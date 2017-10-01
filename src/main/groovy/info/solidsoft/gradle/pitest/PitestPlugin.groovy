@@ -32,6 +32,7 @@ class PitestPlugin implements Plugin<Project> {
     public final static String DEFAULT_PITEST_VERSION = '1.2.2'
     public final static String PITEST_TASK_GROUP = "Report"
     public final static String PITEST_TASK_NAME = "pitest"
+    public final static String SCM_PITEST_TASK_NAME = "scmPitest"
     public final static String PITEST_CONFIGURATION_NAME = 'pitest'
 
     private final static List<String> DYNAMIC_LIBRARY_EXTENSIONS = ['so', 'dll', 'dylib']
@@ -45,19 +46,28 @@ class PitestPlugin implements Plugin<Project> {
 
     private Project project
     private PitestPluginExtension extension
+    private ScmPitestPluginExtension scmExtension
 
     void apply(Project project) {
         this.project = project
         applyRequiredJavaPlugin()
         createConfigurations()
         createExtension(project)
+        createScmExtension(project)
         project.plugins.withType(JavaBasePlugin) {
             PitestTask task = project.tasks.create(PITEST_TASK_NAME, PitestTask)
             task.with {
                 description = "Run PIT analysis for java classes"
                 group = PITEST_TASK_GROUP
             }
+            ScmPitestTask scmPitestTask = project.tasks.create(SCM_PITEST_TASK_NAME, ScmPitestTask)
+            scmPitestTask.with {
+                description = "Run PIT analysis for java classes using specified scm repository"
+                group = PITEST_TASK_GROUP
+            }
+            scmPitestTask.scm.url = scmExtension.scm.url
             configureTaskDefault(task)
+            configureTaskDefault(scmPitestTask)
         }
     }
 
@@ -81,6 +91,14 @@ class PitestPlugin implements Plugin<Project> {
         extension.pitestVersion = DEFAULT_PITEST_VERSION
         extension.testSourceSets = [project.sourceSets.test] as Set
         extension.mainSourceSets = [project.sourceSets.main] as Set
+    }
+
+    private void createScmExtension(Project project) {
+        scmExtension = project.extensions.create("scmPitest", ScmPitestPluginExtension)
+        scmExtension.reportDir = new File("${project.reporting.baseDir.path}/pitest")
+        scmExtension.pitestVersion = DEFAULT_PITEST_VERSION
+        scmExtension.testSourceSets = [project.sourceSets.test] as Set
+        scmExtension.mainSourceSets = [project.sourceSets.main] as Set
     }
 
     private void configureTaskDefault(PitestTask task) {

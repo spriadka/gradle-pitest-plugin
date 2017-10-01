@@ -3,11 +3,10 @@ package info.solidsoft.gradle.pitest
 import groovy.transform.SelfType
 
 @SelfType(BasicProjectBuilderSpec)
-trait WithPitestTaskInitialization {
-
-    PitestTask task
+trait WithScmPitestTaskInitialization {
+    ScmPitestTask scmPitestTask
 
     def setup() {
-        task = getJustOnePitestTaskOrFail()
+        scmPitestTask = getJustOneScmPitestTaskOrFail()
     }
 }

@@ -34,6 +34,17 @@ class PitestPluginTest extends Specification {
             assertThatTasksAreInGroup(project, [PitestPlugin.PITEST_TASK_NAME], PitestPlugin.PITEST_TASK_GROUP)
     }
 
+    def "add scmPitest task to java project in proper group" () {
+        given:
+            Project project = ProjectBuilder.builder().build()
+            project.apply(plugin: "java")
+        when:
+            project.apply(plugin: "info.solidsoft.pitest")
+        then:
+            project.plugins.hasPlugin(PitestPlugin)
+            assertThatTasksAreInGroup(project, [PitestPlugin.PITEST_TASK_NAME, PitestPlugin.SCM_PITEST_TASK_NAME], PitestPlugin.PITEST_TASK_GROUP)
+    }
+
     @Issue("https://github.com/szpak/gradle-pitest-plugin/issues/21")
     def "apply Java plugin itself of not already applied"() {
         given:
