@@ -5,8 +5,4 @@ class ScmConnection {
     String developerConnection
     String tag
     String url
-
-    void setUrl(String url) {
-        this.url = url
-    }
 }

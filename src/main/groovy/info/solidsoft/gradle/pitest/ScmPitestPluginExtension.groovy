@@ -1,9 +1,9 @@
 package info.solidsoft.gradle.pitest
 
-class ScmPitestPluginExtension extends PitestPluginExtension {
-    ScmConnection scm
+import groovy.transform.CompileStatic
 
-    ScmPitestPluginExtension() {
-        scm = new ScmConnection()
-    }
+@CompileStatic
+class ScmPitestPluginExtension extends PitestPluginExtension {
+
+    ScmConnection scm = new ScmConnection()
 }
