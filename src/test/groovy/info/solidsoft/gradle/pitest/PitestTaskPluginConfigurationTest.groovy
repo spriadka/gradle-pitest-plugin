@@ -15,7 +15,7 @@
  */
 package info.solidsoft.gradle.pitest
 
-class PitestTaskPluginConfigurationTest extends BasicProjectBuilderSpec implements WithPitestTaskInitialization {
+class PitestTaskPluginConfigurationTest extends BasicProjectBuilderSpec<PitestPluginExtension> implements WithPitestTaskInitialization {
 
     def "should not create pluginConfiguration command line argument when no parameters"() {
         given:

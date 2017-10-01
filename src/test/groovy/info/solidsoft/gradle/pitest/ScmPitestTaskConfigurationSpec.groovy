@@ -1,6 +1,6 @@
 package info.solidsoft.gradle.pitest
 
-class ScmPitestTaskConfigurationSpec extends BasicProjectBuilderSpec implements WithScmPitestTaskInitialization {
+class ScmPitestTaskConfigurationSpec extends BasicProjectBuilderSpec<ScmPitestPluginExtension> implements WithScmPitestTaskInitialization {
     def "should set scm repository correctly" () {
         given:
             project.scmPitest.scm.url = "https://hello-world.com"

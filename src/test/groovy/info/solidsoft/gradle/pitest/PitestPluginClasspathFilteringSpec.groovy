@@ -17,7 +17,7 @@ package info.solidsoft.gradle.pitest
 
 import spock.lang.Issue
 
-class PitestPluginClasspathFilteringSpec extends BasicProjectBuilderSpec {
+class PitestPluginClasspathFilteringSpec extends BasicProjectBuilderSpec<PitestPluginExtension> {
 
     private PitestTask task
 

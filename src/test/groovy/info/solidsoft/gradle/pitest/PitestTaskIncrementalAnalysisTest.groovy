@@ -15,7 +15,7 @@
  */
 package info.solidsoft.gradle.pitest
 
-class PitestTaskIncrementalAnalysisTest extends BasicProjectBuilderSpec implements WithPitestTaskInitialization {
+class PitestTaskIncrementalAnalysisTest extends BasicProjectBuilderSpec<PitestPluginExtension> implements WithPitestTaskInitialization {
 
     def "default analysis mode disabled by default"() {
         when:

@@ -15,7 +15,7 @@
  */
 package info.solidsoft.gradle.pitest
 
-class PitestTaskConfigurationSpec extends BasicProjectBuilderSpec implements WithPitestTaskInitialization {
+class PitestTaskConfigurationSpec extends BasicProjectBuilderSpec<PitestPluginExtension> implements WithPitestTaskInitialization {
 
     def "should pass additional classpath to PIT using classPathFile parameter instead of classPath if configured"() {
         given:

@@ -15,7 +15,7 @@
  */
 package info.solidsoft.gradle.pitest
 
-class PitestPluginTypesConversionTest extends BasicProjectBuilderSpec implements WithPitestTaskInitialization {
+class PitestPluginTypesConversionTest extends BasicProjectBuilderSpec<PitestPluginExtension> implements WithPitestTaskInitialization {
 
     def "accept BigDecimal as timeoutFactor configuration parameter"() {
         given:
