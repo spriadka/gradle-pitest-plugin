@@ -65,9 +65,8 @@ class PitestPlugin implements Plugin<Project> {
                 description = "Run PIT analysis for java classes using specified scm repository"
                 group = PITEST_TASK_GROUP
             }
-            scmPitestTask.scm.url = scmExtension.scm.url
             configureTaskDefault(task)
-            configureTaskDefault(scmPitestTask)
+            configureScmTaskDefault(scmPitestTask)
         }
     }
 
@@ -165,6 +164,80 @@ class PitestPlugin implements Plugin<Project> {
             pluginConfiguration = { extension.pluginConfiguration }
             maxSurviving = { extension.maxSurviving }
             features = { extension.features }
+        }
+
+        project.afterEvaluate {
+            task.dependsOn(calculateTasksToDependOn())
+
+            addPitDependencies()
+        }
+    }
+
+    private void configureScmTaskDefault(ScmPitestTask task) {
+        task.conventionMapping.with {
+            additionalClasspath = {
+                List<FileCollection> testRuntimeClasspath = scmExtension.testSourceSets*.runtimeClasspath
+
+                FileCollection combinedTaskClasspath = new UnionFileCollection(testRuntimeClasspath)
+                FileCollection filteredCombinedTaskClasspath = combinedTaskClasspath.filter { File file ->
+                    !FILE_EXTENSIONS_TO_FILTER_FROM_CLASSPATH.find { file.name.endsWith(".$it") }
+                }
+
+                return filteredCombinedTaskClasspath
+            }
+            useAdditionalClasspathFile = { scmExtension.useClasspathFile }
+            additionalClasspathFile = { new File(project.buildDir, PIT_ADDITIONAL_CLASSPATH_DEFAULT_FILE_NAME) }
+            launchClasspath = {
+                project.rootProject.buildscript.configurations[PITEST_CONFIGURATION_NAME]
+            }
+            mutableCodePaths = { calculateBaseMutableCodePaths() + (extension.additionalMutableCodePaths ?: []) }
+            sourceDirs = { scmExtension.mainSourceSets*.allSource.srcDirs.flatten() as Set }
+
+            reportDir = { scmExtension.reportDir }
+            targetClasses = {
+                log.debug("Setting targetClasses. project.getGroup: {}, class: {}", project.getGroup(), project.getGroup()?.class)
+                if (scmExtension.targetClasses) {
+                    return scmExtension.targetClasses
+                }
+                if (project.getGroup()) {   //Assuming it is always a String class instance
+                    return [project.getGroup() + ".*"] as Set
+                }
+                return null
+            }
+            targetTests = { scmExtension.targetTests }
+            dependencyDistance = { scmExtension.dependencyDistance }
+            threads = { scmExtension.threads }
+            mutateStaticInits = { scmExtension.mutateStaticInits }
+            includeJarFiles = { scmExtension.includeJarFiles }
+            mutators = { scmExtension.mutators }
+            excludedMethods = { scmExtension.excludedMethods }
+            excludedClasses = { scmExtension.excludedClasses }
+            avoidCallsTo = { scmExtension.avoidCallsTo }
+            verbose = { scmExtension.verbose }
+            timeoutFactor = { scmExtension.timeoutFactor }
+            timeoutConstInMillis = { scmExtension.timeoutConstInMillis }
+            maxMutationsPerClass = { scmExtension.maxMutationsPerClass }
+            childProcessJvmArgs = { scmExtension.jvmArgs }
+            outputFormats = { scmExtension.outputFormats }
+            failWhenNoMutations = { scmExtension.failWhenNoMutations }
+            includedGroups = { scmExtension.includedGroups }
+            excludedGroups = { scmExtension.excludedGroups }
+            detectInlinedCode = { scmExtension.detectInlinedCode }
+            timestampedReports = { scmExtension.timestampedReports }
+            historyInputLocation = { scmExtension.historyInputLocation }
+            historyOutputLocation = { scmExtension.historyOutputLocation }
+            enableDefaultIncrementalAnalysis = { scmExtension.enableDefaultIncrementalAnalysis }
+            defaultFileForHistoryData = { new File(project.buildDir, PIT_HISTORY_DEFAULT_FILE_NAME) }
+            mutationThreshold = { scmExtension.mutationThreshold }
+            mutationEngine = { scmExtension.mutationEngine }
+            coverageThreshold = { scmExtension.coverageThreshold }
+            exportLineCoverage = { scmExtension.exportLineCoverage }
+            jvmPath = { scmExtension.jvmPath }
+            mainProcessJvmArgs = { scmExtension.mainProcessJvmArgs }
+            pluginConfiguration = { scmExtension.pluginConfiguration }
+            maxSurviving = { scmExtension.maxSurviving }
+            features = { scmExtension.features }
+            scm = {scmExtension.scm}
         }
 
         project.afterEvaluate {

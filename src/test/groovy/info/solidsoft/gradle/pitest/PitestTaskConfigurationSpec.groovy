@@ -30,8 +30,10 @@ class PitestTaskConfigurationSpec extends BasicProjectBuilderSpec<PitestPluginEx
     def "should pass features configuration to PIT"() {
         given:
             project.pitest.features = ["-FOO", "+BAR(a[1] a[2])"]
+        and:
+            Map<String, String> configurationMap = task.createTaskArgumentMap()
         expect:
-            task.createTaskArgumentMap()['features'] == "-FOO,+BAR(a[1] a[2])"
+            configurationMap['features'] == "-FOO,+BAR(a[1] a[2])"
     }
 
     def "should not pass to PIT parameter '#paramName' by default if not set explicitly"() {

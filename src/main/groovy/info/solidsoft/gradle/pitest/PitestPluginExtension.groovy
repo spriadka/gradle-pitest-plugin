@@ -30,8 +30,6 @@ import org.gradle.api.tasks.TaskInstantiationException
 class PitestPluginExtension {
 
     String pitestVersion
-//    Set<File> sourceDirs  //Removed in 0.30.1 - use mainSourceSets
-
     File reportDir
     Set<String> targetClasses
     Set<String> targetTests

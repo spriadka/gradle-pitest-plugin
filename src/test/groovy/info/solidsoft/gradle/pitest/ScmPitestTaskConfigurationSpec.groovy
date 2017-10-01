@@ -1,10 +1,14 @@
 package info.solidsoft.gradle.pitest
 
 class ScmPitestTaskConfigurationSpec extends BasicProjectBuilderSpec<ScmPitestPluginExtension> implements WithScmPitestTaskInitialization {
-    def "should set scm repository correctly" () {
+
+    def "should set basic parameters correctly" () {
         given:
-            project.scmPitest.scm.url = "https://hello-world.com"
+            String[] targetClasses = ["sample","another-sample"]
+            project.scmPitest.targetClasses = targetClasses
+        and:
+            Map<String, String> configurationMap = scmPitestTask.createTaskArgumentMap()
         expect:
-            scmPitestTask.scm.url == "https://hello-world.com"
+            configurationMap['targetClasses'] == "sample,another-sample"
     }
 }
