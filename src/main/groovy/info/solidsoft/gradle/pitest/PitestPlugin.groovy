@@ -238,6 +238,10 @@ class PitestPlugin implements Plugin<Project> {
             maxSurviving = { scmExtension.maxSurviving }
             features = { scmExtension.features }
             scm = {scmExtension.scm}
+            startScmVersion = {scmExtension.startScmVersion}
+            startScmVersionType = {scmExtension.startScmVersionType}
+            endScmVersion = {scmExtension.endScmVersion}
+            endScmVersionType = {scmExtension.endScmVersionType}
         }
 
         project.afterEvaluate {

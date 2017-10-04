@@ -16,4 +16,22 @@ class ScmConnectionConfigurationSpec extends BasicProjectBuilderSpec<ScmPitestPl
         expect:
             scmConnection.tag == "HEAD"
     }
+
+    def "should set connection correctly" () {
+        given:
+            project.scmPitest.scm.connection = "scm:git:fancy-connection"
+        and:
+            ScmConnection scmConnection = scmPitestTask.scm
+        expect:
+            scmConnection.connection == "scm:git:fancy-connection"
+    }
+
+    def "should set developer connection correctly" () {
+        given:
+            project.scmPitest.scm.developerConnection = "scm:git:fancy-developer-connection"
+        and:
+            ScmConnection scmConnection = scmPitestTask.scm
+        expect:
+            scmConnection.developerConnection == "scm:git:fancy-developer-connection"
+    }
 }

@@ -6,4 +6,9 @@ import groovy.transform.CompileStatic
 class ScmPitestPluginExtension extends PitestPluginExtension {
 
     ScmConnection scm = new ScmConnection()
+
+    String startScmVersionType
+    String startScmVersion
+    String endScmVersionType
+    String endScmVersion
 }
