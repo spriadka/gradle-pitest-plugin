@@ -11,14 +11,14 @@ import org.apache.maven.scm.command.changelog.ChangeLogScmRequest
 import org.apache.maven.scm.command.changelog.ChangeLogScmResult
 import org.apache.maven.scm.manager.ScmManager
 
-class CustomScmStatistics extends AbstractScmChangeLogStatistics {
+class CustomChangeLogStrategy extends AbstractChangeLogStrategy {
 
     String startScmVersionType
     String startScmVersion
     String endScmVersionType
     String endScmVersion
 
-    CustomScmStatistics(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includingFileStatuses, String repository) {
+    CustomChangeLogStrategy(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includingFileStatuses, String repository) {
         super(scmRoot, scmManager, includingFileStatuses, repository)
     }
 

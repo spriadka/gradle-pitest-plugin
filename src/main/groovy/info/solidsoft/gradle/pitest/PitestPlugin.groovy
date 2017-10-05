@@ -242,6 +242,8 @@ class PitestPlugin implements Plugin<Project> {
             startScmVersionType = {scmExtension.startScmVersionType}
             endScmVersion = {scmExtension.endScmVersion}
             endScmVersionType = {scmExtension.endScmVersionType}
+            includeFileStatuses = {scmExtension.includeFileStatuses}
+            scmRoot = {scmExtension.scmRoot}
         }
 
         project.afterEvaluate {

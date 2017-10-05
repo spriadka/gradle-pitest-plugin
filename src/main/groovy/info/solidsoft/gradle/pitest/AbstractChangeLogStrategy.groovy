@@ -5,7 +5,7 @@ import org.apache.maven.scm.ScmFileStatus
 import org.apache.maven.scm.manager.ScmManager
 import org.apache.maven.scm.repository.ScmRepository
 
-abstract class AbstractScmChangeLogStatistics implements ChangeLogExecutor {
+abstract class AbstractChangeLogStrategy implements ChangeLogExecutor {
 
     protected ScmFileSet scmRoot
     protected ScmManager scmManager
@@ -13,7 +13,7 @@ abstract class AbstractScmChangeLogStatistics implements ChangeLogExecutor {
     protected Set<ScmFileStatus> includingFileStatuses
     protected List<String> modifiedFileNames
 
-    protected AbstractScmChangeLogStatistics(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includingFileStatuses, String repository) {
+    protected AbstractChangeLogStrategy(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includingFileStatuses, String repository) {
         this.scmRoot = new ScmFileSet(scmRoot)
         this.scmManager = scmManager
         this.includingFileStatuses = includingFileStatuses
