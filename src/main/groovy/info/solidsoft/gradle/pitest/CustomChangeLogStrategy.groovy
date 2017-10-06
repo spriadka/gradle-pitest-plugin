@@ -10,6 +10,7 @@ import org.apache.maven.scm.ScmVersion
 import org.apache.maven.scm.command.changelog.ChangeLogScmRequest
 import org.apache.maven.scm.command.changelog.ChangeLogScmResult
 import org.apache.maven.scm.manager.ScmManager
+import org.apache.maven.scm.repository.ScmRepository
 
 class CustomChangeLogStrategy extends AbstractChangeLogStrategy {
 
@@ -18,7 +19,7 @@ class CustomChangeLogStrategy extends AbstractChangeLogStrategy {
     String endScmVersionType
     String endScmVersion
 
-    CustomChangeLogStrategy(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includingFileStatuses, String repository) {
+    CustomChangeLogStrategy(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includingFileStatuses, ScmRepository repository) {
         super(scmRoot, scmManager, includingFileStatuses, repository)
     }
 

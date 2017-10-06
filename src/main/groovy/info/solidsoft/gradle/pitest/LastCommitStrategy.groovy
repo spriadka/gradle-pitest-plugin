@@ -6,9 +6,10 @@ import org.apache.maven.scm.ScmFileStatus
 import org.apache.maven.scm.command.changelog.ChangeLogScmRequest
 import org.apache.maven.scm.command.changelog.ChangeLogScmResult
 import org.apache.maven.scm.manager.ScmManager
+import org.apache.maven.scm.repository.ScmRepository
 
 class LastCommitStrategy extends AbstractChangeLogStrategy {
-    LastCommitStrategy(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includingFileStatuses, String repository) {
+    LastCommitStrategy(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includingFileStatuses, ScmRepository repository) {
         super(scmRoot, scmManager, includingFileStatuses, repository)
     }
 

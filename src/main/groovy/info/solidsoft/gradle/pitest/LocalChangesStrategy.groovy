@@ -4,10 +4,11 @@ import org.apache.maven.scm.ScmFile
 import org.apache.maven.scm.ScmFileStatus
 import org.apache.maven.scm.command.status.StatusScmResult
 import org.apache.maven.scm.manager.ScmManager
+import org.apache.maven.scm.repository.ScmRepository
 
 class LocalChangesStrategy extends AbstractChangeLogStrategy {
 
-    LocalChangesStrategy(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includedFileStatuses, String repositoryUrl) {
+    LocalChangesStrategy(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includedFileStatuses, ScmRepository repositoryUrl) {
         super(scmRoot, scmManager, includedFileStatuses, repositoryUrl)
     }
 

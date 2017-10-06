@@ -244,6 +244,8 @@ class PitestPlugin implements Plugin<Project> {
             endScmVersionType = {scmExtension.endScmVersionType}
             includeFileStatuses = {scmExtension.includeFileStatuses}
             scmRoot = {scmExtension.scmRoot}
+            connectionType = {scmExtension.connectionType}
+            goal = {scmExtension.goal}
         }
 
         project.afterEvaluate {

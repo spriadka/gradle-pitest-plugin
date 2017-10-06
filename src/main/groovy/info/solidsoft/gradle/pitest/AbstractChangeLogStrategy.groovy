@@ -13,11 +13,11 @@ abstract class AbstractChangeLogStrategy implements ChangeLogExecutor {
     protected Set<ScmFileStatus> includingFileStatuses
     protected List<String> modifiedFileNames
 
-    protected AbstractChangeLogStrategy(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includingFileStatuses, String repository) {
+    protected AbstractChangeLogStrategy(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includingFileStatuses, ScmRepository repository) {
         this.scmRoot = new ScmFileSet(scmRoot)
         this.scmManager = scmManager
         this.includingFileStatuses = includingFileStatuses
-        this.repository = scmManager.makeScmRepository(repository)
+        this.repository = repository
         this.modifiedFileNames = new ArrayList<>()
     }
 }

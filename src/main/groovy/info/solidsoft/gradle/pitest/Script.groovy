@@ -42,3 +42,5 @@ printFiles(new LocalChangesStrategy(new File(scmRoot), manager, [ScmFileStatus.A
 println "LAST COMMIT::::::::::"
 printFiles(new LastCommitStrategy(new File(scmRoot), manager, [ScmFileStatus.ADDED] as Set, scmUrl).executeChangeLog())
 
+println(manager.validateScmRepository("scm:git:git@github/hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh.com"))
+
