@@ -1,18 +1,6 @@
 package info.solidsoft.gradle.pitest
 
-import org.apache.maven.scm.ScmFileStatus
-
 class ScmPitestTaskConfigurationSpec extends BasicProjectBuilderSpec<ScmPitestPluginExtension> implements WithScmPitestTaskInitialization {
-
-    def "should set basic parameters correctly"() {
-        given:
-            String[] targetClasses = ["sample", "another-sample"]
-            project.scmPitest.targetClasses = targetClasses
-        and:
-            Map<String, String> configurationMap = scmPitestTask.createTaskArgumentMap()
-        expect:
-            configurationMap['targetClasses'] == "sample,another-sample"
-    }
 
     def "should set start scm version correctly"() {
         given:
@@ -21,11 +9,13 @@ class ScmPitestTaskConfigurationSpec extends BasicProjectBuilderSpec<ScmPitestPl
             scmPitestTask.startScmVersion == "1.0.0"
     }
 
-    def "should set start scm version type correctly"() {
+    def "should set start scm version type to '#versionType' correctly"() {
         given:
-            project.scmPitest.startScmVersionType = "tag"
+            project.scmPitest.startScmVersionType = versionType
         expect:
-            scmPitestTask.startScmVersionType == "tag"
+            scmPitestTask.startScmVersionType == versionType
+        where:
+            versionType << ["tag","revision","repository"]
     }
 
     def "should set end scm version correctly"() {
@@ -35,11 +25,13 @@ class ScmPitestTaskConfigurationSpec extends BasicProjectBuilderSpec<ScmPitestPl
             scmPitestTask.startScmVersion == "release/1.2.2"
     }
 
-    def "should set end scm version type correctly"() {
+    def "should set end scm version type to '#versionType' correctly"() {
         given:
-            project.scmPitest.startScmVersionType = "tag"
+            project.scmPitest.startScmVersionType = versionType
         expect:
-            scmPitestTask.startScmVersionType == "tag"
+            scmPitestTask.startScmVersionType == versionType
+        where:
+            versionType << ["tag","revision","branch"]
     }
 
     def "should set scm root correctly" () {
@@ -49,10 +41,30 @@ class ScmPitestTaskConfigurationSpec extends BasicProjectBuilderSpec<ScmPitestPl
             scmPitestTask.scmRoot == project.rootDir
     }
 
-    def "should set include file statuses correctly"() {
+    def "should set connectionType to '#connectionType' correctly" () {
         given:
-            project.scmPitest.includeFileStatuses = ["added"]
+            project.scmPitest.connectionType = connectionType
         expect:
-            scmPitestTask.includeFileStatuses == [ScmFileStatus.ADDED] as Set
+            scmPitestTask.connectionType == connectionType
+        where:
+            connectionType << ["connection", "developerConnection"]
+    }
+
+    def "should set goal to '#goal' correctly" () {
+        given:
+            project.scmPitest.goal = goal
+        expect:
+            scmPitestTask.goal == goal
+        where:
+            goal << ["lastCommit", "localChanges", "custom"]
+    }
+
+    def "should set includeFileStatuses correctly ('#fileStatuses')" () {
+        given:
+            project.scmPitest.includeFileStatuses = fileStatuses
+        expect:
+            scmPitestTask.includeFileStatuses == fileStatuses as Set
+        where:
+            fileStatuses << [["added","modified","deleted"],["added","added"],["deleted","unknown","added","modified"]]
     }
 }

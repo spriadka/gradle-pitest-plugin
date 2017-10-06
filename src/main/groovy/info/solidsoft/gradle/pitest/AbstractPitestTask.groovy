@@ -167,14 +167,6 @@ abstract class AbstractPitestTask extends JavaExec {
     @Optional
     List<String> features
 
-    @Override
-    void exec() {
-        executePitestReport()
-        super.exec()
-    }
-
-    protected abstract void executePitestReport()
-
     @PackageScope   //visible for testing
     Map<String, String> createTaskArgumentMap() {
         Map<String, String> map = [:]

@@ -101,11 +101,6 @@ class PitestPluginFunctional1Spec extends AbstractPitestFunctionalSpec {
                     repositories {
                         mavenCentral()
                     }
-//                    //Local/current version of the plugin should be put on a classpath anyway
-//                    //That cannot be also used to override the plugin version as the current version is earlier on a classpath
-//                    dependencies {
-//                        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.1.9'
-//                    }
                 }
                 dependencies {
                     testCompile 'junit:junit:4.12'

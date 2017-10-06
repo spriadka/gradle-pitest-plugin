@@ -1,13 +1,14 @@
 package info.solidsoft.gradle.pitest
 
 import org.apache.maven.scm.ScmFile
-import org.apache.maven.scm.ScmFileStatus
 import org.apache.maven.scm.command.status.StatusScmResult
 import org.apache.maven.scm.manager.ScmManager
+import org.apache.maven.scm.repository.ScmRepository
 
 class LocalChangesStrategy extends AbstractChangeLogStrategy {
 
-    LocalChangesStrategy(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includedFileStatuses, String repositoryUrl) {
+    LocalChangesStrategy(File scmRoot, ScmManager scmManager,
+                         Set<String> includedFileStatuses, ScmRepository repositoryUrl) {
         super(scmRoot, scmManager, includedFileStatuses, repositoryUrl)
     }
 
@@ -15,7 +16,7 @@ class LocalChangesStrategy extends AbstractChangeLogStrategy {
     List<String> executeChangeLog() {
         StatusScmResult statusScmResult = scmManager.status(repository, scmRoot)
         for (ScmFile file : statusScmResult.changedFiles) {
-            if (includingFileStatuses.contains(file.status)) {
+            if (includingFileStatuses.contains(file.status.toString())) {
                 modifiedFileNames.add(file.path)
             }
         }

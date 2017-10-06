@@ -17,6 +17,7 @@ package info.solidsoft.gradle.pitest
 
 import groovy.transform.CompileStatic
 import org.gradle.api.Incubating
+import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskInstantiationException
 

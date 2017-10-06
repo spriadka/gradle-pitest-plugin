@@ -2,13 +2,14 @@ package info.solidsoft.gradle.pitest
 
 import org.apache.maven.scm.ChangeFile
 import org.apache.maven.scm.ChangeSet
-import org.apache.maven.scm.ScmFileStatus
 import org.apache.maven.scm.command.changelog.ChangeLogScmRequest
 import org.apache.maven.scm.command.changelog.ChangeLogScmResult
 import org.apache.maven.scm.manager.ScmManager
+import org.apache.maven.scm.repository.ScmRepository
 
 class LastCommitStrategy extends AbstractChangeLogStrategy {
-    LastCommitStrategy(File scmRoot, ScmManager scmManager, Set<ScmFileStatus> includingFileStatuses, String repository) {
+    LastCommitStrategy(File scmRoot, ScmManager scmManager,
+                       Set<String> includingFileStatuses, ScmRepository repository) {
         super(scmRoot, scmManager, includingFileStatuses, repository)
     }
 
@@ -22,7 +23,7 @@ class LastCommitStrategy extends AbstractChangeLogStrategy {
         }
         result.changeLog.changeSets.each { ChangeSet changeSet ->
             changeSet.getFiles().each { ChangeFile changeFile ->
-                if (includingFileStatuses.contains(changeFile.action)) {
+                if (includingFileStatuses.contains(changeFile.action.toString())) {
                     modifiedFileNames.add(changeFile.name)
                 }
             }

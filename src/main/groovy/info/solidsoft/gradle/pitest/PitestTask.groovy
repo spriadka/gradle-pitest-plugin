@@ -32,10 +32,11 @@ import org.gradle.api.tasks.OutputFile
 class PitestTask extends AbstractPitestTask {
 
     @Override
-    protected void executePitestReport() {
+    void exec() {
         args = createListOfAllArgumentsForPit()
         jvmArgs = (getMainProcessJvmArgs() ?: getJvmArgs())
         main = "org.pitest.mutationtest.commandline.MutationCoverageReport"
         classpath = getLaunchClasspath()
+        super.exec()
     }
 }
