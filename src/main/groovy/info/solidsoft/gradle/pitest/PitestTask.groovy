@@ -31,6 +31,12 @@ import org.gradle.api.tasks.OutputFile
 @CompileStatic
 class PitestTask extends AbstractPitestTask {
 
+    PitestTask() {
+        super()
+        description = "Run PIT analysis for java classes"
+    }
+
+
     @Override
     void exec() {
         args = createListOfAllArgumentsForPit()

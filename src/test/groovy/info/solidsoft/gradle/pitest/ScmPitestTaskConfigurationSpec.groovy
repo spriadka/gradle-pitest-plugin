@@ -1,5 +1,9 @@
 package info.solidsoft.gradle.pitest
 
+import org.apache.maven.scm.manager.BasicScmManager
+import org.apache.maven.scm.manager.ScmManager
+import org.apache.maven.scm.provider.git.gitexe.GitExeScmProvider
+
 class ScmPitestTaskConfigurationSpec extends BasicProjectBuilderSpec<ScmPitestPluginExtension> implements WithScmPitestTaskInitialization {
 
     def "should set start scm version correctly"() {
@@ -16,13 +20,6 @@ class ScmPitestTaskConfigurationSpec extends BasicProjectBuilderSpec<ScmPitestPl
             scmPitestTask.startScmVersionType == versionType
         where:
             versionType << ["tag","revision","repository"]
-    }
-
-    def "should set end scm version correctly"() {
-        given:
-            project.scmPitest.startScmVersion = "release/1.2.2"
-        expect:
-            scmPitestTask.startScmVersion == "release/1.2.2"
     }
 
     def "should set end scm version type to '#versionType' correctly"() {
@@ -52,11 +49,25 @@ class ScmPitestTaskConfigurationSpec extends BasicProjectBuilderSpec<ScmPitestPl
 
     def "should set goal to '#goal' correctly" () {
         given:
+            project.scmPitest.scmRoot = "."
+            project.scmPitest.manager = createManagerDouble()
+            project.scmPitest.scm.url = "scm:git:git@github/hal/testsuite"
+            project.scmPitest.includeFileStatuses = ["added"] as Set
             project.scmPitest.goal = goal
+            Map<String, Class<ChangeLogStrategy>> goalMap = new HashMap<>()
+            goalMap.put("lastCommit", LastCommitStrategy.class)
+            goalMap.put("localChanges", LocalChangesStrategy.class)
+            goalMap.put("custom", CustomChangeLogStrategy.class)
         expect:
-            scmPitestTask.goal == goal
+            scmPitestTask.goal.class == goalMap.get(goal)
         where:
             goal << ["lastCommit", "localChanges", "custom"]
+    }
+
+    private ScmManager createManagerDouble() {
+        ScmManager manager = new BasicScmManager()
+        manager.setScmProvider("git", new GitExeScmProvider())
+        return manager
     }
 
     def "should set includeFileStatuses correctly ('#fileStatuses')" () {

@@ -1,5 +1,5 @@
 package info.solidsoft.gradle.pitest
 
-interface ChangeLogExecutor {
+interface ChangeLogStrategy {
     List<String> executeChangeLog()
 }

@@ -13,6 +13,10 @@ class CustomChangeLogStrategy extends AbstractChangeLogStrategy {
     ScmVersion startScmVersion
     ScmVersion endScmVersion
 
+    CustomChangeLogStrategy() {
+        super()
+    }
+
     CustomChangeLogStrategy(File scmRoot, ScmManager scmManager,
                             Set<String> includingFileStatuses, ScmRepository repository) {
         super(scmRoot, scmManager, includingFileStatuses, repository)

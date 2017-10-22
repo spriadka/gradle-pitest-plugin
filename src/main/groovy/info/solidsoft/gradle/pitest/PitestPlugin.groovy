@@ -47,6 +47,8 @@ class PitestPlugin implements Plugin<Project> {
     private Project project
     private PitestPluginExtension extension
     private ScmPitestPluginExtension scmExtension
+    private ScmPitestTask scmPitestTask
+    private PitestTask pitestTask
 
     void apply(Project project) {
         this.project = project
@@ -55,19 +57,34 @@ class PitestPlugin implements Plugin<Project> {
         createExtension(project)
         createScmExtension(project)
         project.plugins.withType(JavaBasePlugin) {
-            PitestTask task = project.tasks.create(PITEST_TASK_NAME, PitestTask)
-            task.with {
+            pitestTask = project.tasks.create(PITEST_TASK_NAME, PitestTask)
+            pitestTask.with {
                 description = "Run PIT analysis for java classes"
                 group = PITEST_TASK_GROUP
             }
-            ScmPitestTask scmPitestTask = project.tasks.create(SCM_PITEST_TASK_NAME, ScmPitestTask)
+            scmPitestTask = project.tasks.create(SCM_PITEST_TASK_NAME, ScmPitestTask)
             scmPitestTask.with {
                 description = "Run PIT analysis for java classes using specified scm repository"
                 group = PITEST_TASK_GROUP
             }
-            configureTaskDefault(task)
-            configureScmTaskDefault(scmPitestTask)
+            pitestTask.setMutableCodePaths(calculateBaseMutableCodePaths() + (extension.additionalMutableCodePaths ?: []))
+            pitestTask.setSourceDirs(getSourceDirsFromExtension(extension))
+            configurePitestTaskFromExtension(pitestTask, extension)
+            configureScmTaskFromExtension(scmPitestTask, scmExtension)
         }
+        project.afterEvaluate {
+            pitestTask.dependsOn(calculateTasksToDependOn())
+            if (!pitestTask.targetClasses) {
+                if (project.group) {
+                    pitestTask.setTargetClasses([project.group + ".*"] as Set)
+                }
+            }
+            addPitDependencies()
+        }
+    }
+
+    private Set<File> getSourceDirsFromExtension(PitestPluginExtension extension) {
+        return extension.mainSourceSets*.allSource.srcDirs.flatten() as Set<File>
     }
 
     private void applyRequiredJavaPlugin() {
@@ -85,174 +102,85 @@ class PitestPlugin implements Plugin<Project> {
 
     //TODO: MZA: Maybe move it to the constructor of an extension class?
     private void createExtension(Project project) {
-        extension = project.extensions.create("pitest", PitestPluginExtension)
-        extension.reportDir = new File("${project.reporting.baseDir.path}/pitest")
+        extension = project.extensions.create("pitest", PitestPluginExtension, project)
+        extension.setReportDir("${project.reporting.baseDir.path}/pitest")
         extension.pitestVersion = DEFAULT_PITEST_VERSION
         extension.testSourceSets = [project.sourceSets.test] as Set
         extension.mainSourceSets = [project.sourceSets.main] as Set
     }
 
     private void createScmExtension(Project project) {
-        scmExtension = project.extensions.create("scmPitest", ScmPitestPluginExtension)
-        scmExtension.reportDir = new File("${project.reporting.baseDir.path}/pitest")
+        scmExtension = project.extensions.create("scmPitest", ScmPitestPluginExtension, project)
+        scmExtension.setReportDir("${project.reporting.baseDir.path}/pitest")
         scmExtension.pitestVersion = DEFAULT_PITEST_VERSION
         scmExtension.testSourceSets = [project.sourceSets.test] as Set
         scmExtension.mainSourceSets = [project.sourceSets.main] as Set
     }
 
-    private void configureTaskDefault(PitestTask task) {
-        task.conventionMapping.with {
-            additionalClasspath = {
-                List<FileCollection> testRuntimeClasspath = extension.testSourceSets*.runtimeClasspath
-
-                FileCollection combinedTaskClasspath = new UnionFileCollection(testRuntimeClasspath)
-                FileCollection filteredCombinedTaskClasspath = combinedTaskClasspath.filter { File file ->
-                    !FILE_EXTENSIONS_TO_FILTER_FROM_CLASSPATH.find { file.name.endsWith(".$it") }
-                }
-
-                return filteredCombinedTaskClasspath
-            }
-            useAdditionalClasspathFile = { extension.useClasspathFile }
-            additionalClasspathFile = { new File(project.buildDir, PIT_ADDITIONAL_CLASSPATH_DEFAULT_FILE_NAME) }
-            launchClasspath = {
-                project.rootProject.buildscript.configurations[PITEST_CONFIGURATION_NAME]
-            }
-            mutableCodePaths = { calculateBaseMutableCodePaths() + (extension.additionalMutableCodePaths ?: []) }
-            sourceDirs = { extension.mainSourceSets*.allSource.srcDirs.flatten() as Set }
-
-            reportDir = { extension.reportDir }
-            targetClasses = {
-                log.debug("Setting targetClasses. project.getGroup: {}, class: {}", project.getGroup(), project.getGroup()?.class)
-                if (extension.targetClasses) {
-                    return extension.targetClasses
-                }
-                if (project.getGroup()) {   //Assuming it is always a String class instance
-                    return [project.getGroup() + ".*"] as Set
-                }
-                return null
-            }
-            targetTests = { extension.targetTests }
-            dependencyDistance = { extension.dependencyDistance }
-            threads = { extension.threads }
-            mutateStaticInits = { extension.mutateStaticInits }
-            includeJarFiles = { extension.includeJarFiles }
-            mutators = { extension.mutators }
-            excludedMethods = { extension.excludedMethods }
-            excludedClasses = { extension.excludedClasses }
-            avoidCallsTo = { extension.avoidCallsTo }
-            verbose = { extension.verbose }
-            timeoutFactor = { extension.timeoutFactor }
-            timeoutConstInMillis = { extension.timeoutConstInMillis }
-            maxMutationsPerClass = { extension.maxMutationsPerClass }
-            childProcessJvmArgs = { extension.jvmArgs }
-            outputFormats = { extension.outputFormats }
-            failWhenNoMutations = { extension.failWhenNoMutations }
-            includedGroups = { extension.includedGroups }
-            excludedGroups = { extension.excludedGroups }
-            detectInlinedCode = { extension.detectInlinedCode }
-            timestampedReports = { extension.timestampedReports }
-            historyInputLocation = { extension.historyInputLocation }
-            historyOutputLocation = { extension.historyOutputLocation }
-            enableDefaultIncrementalAnalysis = { extension.enableDefaultIncrementalAnalysis }
-            defaultFileForHistoryData = { new File(project.buildDir, PIT_HISTORY_DEFAULT_FILE_NAME) }
-            mutationThreshold = { extension.mutationThreshold }
-            mutationEngine = { extension.mutationEngine }
-            coverageThreshold = { extension.coverageThreshold }
-            exportLineCoverage = { extension.exportLineCoverage }
-            jvmPath = { extension.jvmPath }
-            mainProcessJvmArgs = { extension.mainProcessJvmArgs }
-            pluginConfiguration = { extension.pluginConfiguration }
-            maxSurviving = { extension.maxSurviving }
-            features = { extension.features }
-        }
-
-        project.afterEvaluate {
-            task.dependsOn(calculateTasksToDependOn())
-
-            addPitDependencies()
-        }
+    private void configurePitestTaskFromExtension(AbstractPitestTask task, PitestPluginExtension extension) {
+        task.setReportDir(extension.getReportDirProvider())
+        task.setLaunchClasspath(project.rootProject.buildscript.configurations[PITEST_CONFIGURATION_NAME])
+        task.setAdditionalClasspath(getAdditionalClasspathFromExtension(extension))
+        task.setAdditionalClasspathFile(new File(project.buildDir, PIT_ADDITIONAL_CLASSPATH_DEFAULT_FILE_NAME))
+        task.setUseClasspathFile(extension.getUseClasspathFileProvider())
+        task.setTimeoutFactor(extension.getTimeoutFactorProvider())
+        task.setTargetClasses(extension.getTargetClassesProvider())
+        task.setTargetTests(extension.getTargetTestsProvider())
+        task.setDependencyDistance(extension.getDependencyDistanceProvider())
+        task.setThreads(extension.getThreadsProvider())
+        task.setMutateStaticInits(extension.getMutateStaticInitsProvider())
+        task.setIncludeJarFiles(extension.getIncludeJarFilesProvider())
+        task.setMutators(extension.getMutatorsProvider())
+        task.setExcludedMethods(extension.getExcludedMethodsProvider())
+        task.setExcludedClasses(extension.getExcludedClassesProvider())
+        task.setAvoidCallsTo(extension.getAvoidCallsToProvider())
+        task.setVerbose(extension.getVerboseProvider())
+        task.setTimeoutConstInMillis(extension.getTimeoutConstInMillisProvider())
+        task.setMaxMutationsPerClass(extension.getMaxMutationsPerClassProvider())
+        task.setChildProcessJvmArgs(extension.getJvmArgsProvider())
+        task.setOutputFormats(extension.getOutputFormatsProvider())
+        task.setFailWhenNoMutations(extension.getFailWhenNoMutationsProvider())
+        task.setIncludedGroups(extension.getIncludedGroupsProvider())
+        task.setExcludedGroups(extension.getExcludedGroupsProvider())
+        task.setDetectInlineCode(extension.getDetectInlinedCodeProvider())
+        task.setTimestampedReports(extension.getTimestampedReportsProvider())
+        task.setHistoryInputLocation(extension.getHistoryInputLocationProvider())
+        task.setHistoryOutputLocation(extension.getHistoryOutputLocationProvider())
+        task.setEnableDefaultIncrementalAnalysis(extension.getEnableDefaultIncrementalAnalysisProvider())
+        task.setDefaultFileForHistoryData(new File(project.buildDir, PIT_HISTORY_DEFAULT_FILE_NAME))
+        task.setMutationThreshold(extension.getMutationThresholdProvider())
+        task.setMutationEngine(extension.getMutationEngineProvider())
+        task.setCoverageThreshold(extension.getCoverageThresholdProvider())
+        task.setExportLineCoverage(extension.getExportLineCoverageProvider())
+        task.setJvmPath(extension.getJvmPathProvider())
+        task.setMainJvmArgs(extension.getMainProcessJvmArgsProvider())
+        task.setPluginConfiguration(extension.getPluginConfigurationProvider())
+        task.setMaxSurviving(extension.getMaxSurvivingProvider())
+        task.setFeatures(extension.getFeaturesProvider())
     }
 
-    private void configureScmTaskDefault(ScmPitestTask task) {
-        task.conventionMapping.with {
-            additionalClasspath = {
-                List<FileCollection> testRuntimeClasspath = scmExtension.testSourceSets*.runtimeClasspath
+    private FileCollection getAdditionalClasspathFromExtension(PitestPluginExtension extension) {
+        List<FileCollection> testRuntimeClasspath = extension.testSourceSets*.runtimeClasspath
 
-                FileCollection combinedTaskClasspath = new UnionFileCollection(testRuntimeClasspath)
-                FileCollection filteredCombinedTaskClasspath = combinedTaskClasspath.filter { File file ->
-                    !FILE_EXTENSIONS_TO_FILTER_FROM_CLASSPATH.find { file.name.endsWith(".$it") }
-                }
-
-                return filteredCombinedTaskClasspath
-            }
-            useAdditionalClasspathFile = { scmExtension.useClasspathFile }
-            additionalClasspathFile = { new File(project.buildDir, PIT_ADDITIONAL_CLASSPATH_DEFAULT_FILE_NAME) }
-            launchClasspath = {
-                project.rootProject.buildscript.configurations[PITEST_CONFIGURATION_NAME]
-            }
-            mutableCodePaths = { calculateBaseMutableCodePaths() + (extension.additionalMutableCodePaths ?: []) }
-            sourceDirs = { scmExtension.mainSourceSets*.allSource.srcDirs.flatten() as Set }
-
-            reportDir = { scmExtension.reportDir }
-            targetClasses = {
-                log.debug("Setting targetClasses. project.getGroup: {}, class: {}", project.getGroup(), project.getGroup()?.class)
-                if (scmExtension.targetClasses) {
-                    return scmExtension.targetClasses
-                }
-                if (project.getGroup()) {   //Assuming it is always a String class instance
-                    return [project.getGroup() + ".*"] as Set
-                }
-                return null
-            }
-            targetTests = { scmExtension.targetTests }
-            dependencyDistance = { scmExtension.dependencyDistance }
-            threads = { scmExtension.threads }
-            mutateStaticInits = { scmExtension.mutateStaticInits }
-            includeJarFiles = { scmExtension.includeJarFiles }
-            mutators = { scmExtension.mutators }
-            excludedMethods = { scmExtension.excludedMethods }
-            excludedClasses = { scmExtension.excludedClasses }
-            avoidCallsTo = { scmExtension.avoidCallsTo }
-            verbose = { scmExtension.verbose }
-            timeoutFactor = { scmExtension.timeoutFactor }
-            timeoutConstInMillis = { scmExtension.timeoutConstInMillis }
-            maxMutationsPerClass = { scmExtension.maxMutationsPerClass }
-            childProcessJvmArgs = { scmExtension.jvmArgs }
-            outputFormats = { scmExtension.outputFormats }
-            failWhenNoMutations = { scmExtension.failWhenNoMutations }
-            includedGroups = { scmExtension.includedGroups }
-            excludedGroups = { scmExtension.excludedGroups }
-            detectInlinedCode = { scmExtension.detectInlinedCode }
-            timestampedReports = { scmExtension.timestampedReports }
-            historyInputLocation = { scmExtension.historyInputLocation }
-            historyOutputLocation = { scmExtension.historyOutputLocation }
-            enableDefaultIncrementalAnalysis = { scmExtension.enableDefaultIncrementalAnalysis }
-            defaultFileForHistoryData = { new File(project.buildDir, PIT_HISTORY_DEFAULT_FILE_NAME) }
-            mutationThreshold = { scmExtension.mutationThreshold }
-            mutationEngine = { scmExtension.mutationEngine }
-            coverageThreshold = { scmExtension.coverageThreshold }
-            exportLineCoverage = { scmExtension.exportLineCoverage }
-            jvmPath = { scmExtension.jvmPath }
-            mainProcessJvmArgs = { scmExtension.mainProcessJvmArgs }
-            pluginConfiguration = { scmExtension.pluginConfiguration }
-            maxSurviving = { scmExtension.maxSurviving }
-            features = { scmExtension.features }
-            scm = {scmExtension.scm}
-            startScmVersion = {scmExtension.startScmVersion}
-            startScmVersionType = {scmExtension.startScmVersionType}
-            endScmVersion = {scmExtension.endScmVersion}
-            endScmVersionType = {scmExtension.endScmVersionType}
-            includeFileStatuses = {scmExtension.includeFileStatuses}
-            scmRoot = {scmExtension.scmRoot}
-            connectionType = {scmExtension.connectionType}
-            goal = {scmExtension.goal}
+        FileCollection combinedTaskClasspath = new UnionFileCollection(testRuntimeClasspath)
+        FileCollection filteredCombinedTaskClasspath = combinedTaskClasspath.filter { File file ->
+            !FILE_EXTENSIONS_TO_FILTER_FROM_CLASSPATH.find { file.name.endsWith(".$it") }
         }
 
-        project.afterEvaluate {
-            task.dependsOn(calculateTasksToDependOn())
+        return filteredCombinedTaskClasspath
+    }
 
-            addPitDependencies()
-        }
+    private void configureScmTaskFromExtension(ScmPitestTask task, ScmPitestPluginExtension scmExtension) {
+        configurePitestTaskFromExtension(task, scmExtension)
+        task.setIncludeFileStatuses(scmExtension.getIncludeFileStatusesProvider())
+        task.setScmRoot(scmExtension.getScmRootProvider())
+        task.setScm(scmExtension.getScmProvider())
+        task.setConnectionType(scmExtension.getConnectionTypeProvider())
+        task.setStartScmVersion(scmExtension.getStartScmVersionProvider())
+        task.setStartScmVersionType(scmExtension.getStartScmVersionTypeProvider())
+        task.setEndScmVersion(scmExtension.getEndScmVersionProvider())
+        task.setEndScmVersionType(scmExtension.getEndScmVersionTypeProvider())
+        task.setGoal(scmExtension.getGoalProvider())
     }
 
     @CompileStatic

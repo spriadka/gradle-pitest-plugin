@@ -8,6 +8,11 @@ import org.apache.maven.scm.manager.ScmManager
 import org.apache.maven.scm.repository.ScmRepository
 
 class LastCommitStrategy extends AbstractChangeLogStrategy {
+
+    LastCommitStrategy() {
+        super()
+    }
+
     LastCommitStrategy(File scmRoot, ScmManager scmManager,
                        Set<String> includingFileStatuses, ScmRepository repository) {
         super(scmRoot, scmManager, includingFileStatuses, repository)

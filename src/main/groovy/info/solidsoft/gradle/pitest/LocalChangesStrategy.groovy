@@ -7,6 +7,10 @@ import org.apache.maven.scm.repository.ScmRepository
 
 class LocalChangesStrategy extends AbstractChangeLogStrategy {
 
+    LocalChangesStrategy() {
+        super()
+    }
+
     LocalChangesStrategy(File scmRoot, ScmManager scmManager,
                          Set<String> includedFileStatuses, ScmRepository repositoryUrl) {
         super(scmRoot, scmManager, includedFileStatuses, repositoryUrl)
